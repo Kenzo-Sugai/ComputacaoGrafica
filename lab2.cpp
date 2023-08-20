@@ -11,6 +11,61 @@ GLfloat angle, fAspect;
 
 GLfloat dx = 0, dy = 0, dz = 0;
 
+GLfloat* matrixMultiply(const GLfloat* M1, const GLfloat* M2) {
+
+	const int FIXED_MATRIX_SIZE = 4;
+	
+	GLfloat* resultMatrix = new GLfloat[16];
+
+	for (int i = 0; i < FIXED_MATRIX_SIZE; i++) {
+		for (int j = 0; j < FIXED_MATRIX_SIZE; j++) {
+			resultMatrix[i * FIXED_MATRIX_SIZE + j] = 0;
+			for (int k = 0; k < FIXED_MATRIX_SIZE; k++)
+				resultMatrix[i * FIXED_MATRIX_SIZE + j] += M1[i * FIXED_MATRIX_SIZE + k] * M2[k * FIXED_MATRIX_SIZE + j];
+		}
+	}
+
+	return resultMatrix;
+
+}
+
+void matrixTranslateMoviment(GLfloat dx, GLfloat dy, GLfloat dz) {
+
+	GLfloat currentMatrix[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentMatrix);
+	
+	const GLfloat identityMatrix[16] = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		dx, dy, dz, 1
+	};
+
+	const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
+
+	glLoadMatrixf(resultMatrix);
+
+}
+
+void matrixTranslateScale(GLfloat dx, GLfloat dy, GLfloat dz) {
+
+	GLfloat currentMatrix[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentMatrix);
+
+	const GLfloat identityMatrix[16] = {
+		dx, 0, 0, 0,
+		0, dy, 0, 0,
+		0, 0, dz, 0,
+		0, 0, 0, 1
+	};
+	
+	const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
+
+	glLoadMatrixf(resultMatrix);
+
+}
+
+
 void desenhaMalha() {
 
 	glBegin(GL_TRIANGLE_FAN);
@@ -35,11 +90,15 @@ void Desenha(void)
 	glPushMatrix(); // empacota as ações
 
 	//desenhaMalha();
-	
-	glTranslatef(dx, dy, dz);  // faz uma translação
+
+	//matrixTranslateMoviment(dx, dy, dz);
 	glutWireTeapot(50.0f);     // constrói um objeto qualquer
 	glPopMatrix();  // desempacota as ações
 
+	matrixTranslateScale(dx, dy, dz);
+	//glScalef(dx, dy, dz);
+	glLoadIdentity();
+	
 	// Executa os comandos OpenGL
 	glutSwapBuffers();  // troca de buffer para acelerar a cena
 
@@ -88,25 +147,25 @@ void AlteraTamanhoJanela(GLsizei w, GLsizei h)
 	EspecificaParametrosVisualizacao();
 }
 
-void mouse_click(int button, int state, int x, int y) {
-	
+void mouseInteract(int button, int state, int x, int y) {
+
 	if (button == GLUT_LEFT_BUTTON) {
 
 		if (state == GLUT_UP) {
+			
+			dx = -1*GLUT_WINDOW_WIDTH + x;
+			dy = GLUT_WINDOW_HEIGHT - y;
 
-			dx = GLUT_WINDOW_WIDTH-x;
-			dy = GLUT_WINDOW_HEIGHT-y;
+			std::cout << x << std::endl;
+			std::cout << y << std::endl;
 
 		}
 	}
-	
-	EspecificaParametrosVisualizacao();
+
 	glutPostRedisplay();
 }
 
 void teclado(unsigned char key, int x, int y) {
-
-	std::cout << "[Tecla: " << key << " = {" << dx << ", " << dy << "}]" << std::endl;
 
 	switch (tolower(key)) {
 		case 'd': dx += 10; break;
@@ -114,6 +173,8 @@ void teclado(unsigned char key, int x, int y) {
 		case 's': dy -= 10; break;
 		case 'w': dy += 10; break;
 	}
+
+	std::cout << "[Tecla: " << key << " = {" << dx << ", " << dy << "}]" << std::endl;
 
 	glutPostRedisplay();
 
@@ -144,8 +205,8 @@ int main(int argc, char* argv[])
 	glutCreateWindow("Visualizacao 3D");
 	glutDisplayFunc(Desenha);
 	glutReshapeFunc(AlteraTamanhoJanela);
-	glutMouseFunc(mouse_click);
-	
+	glutMouseFunc(mouseInteract);
+	//glutMouseFunc(GerenciaMouse);
 	glutKeyboardFunc(teclado);
 
 	Inicializa();
