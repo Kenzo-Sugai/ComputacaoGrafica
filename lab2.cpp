@@ -14,7 +14,7 @@ GLfloat dx = 0, dy = 0, dz = 0;
 GLfloat* matrixMultiply(const GLfloat* M1, const GLfloat* M2) {
 
 	const int FIXED_MATRIX_SIZE = 4;
-	
+
 	GLfloat* resultMatrix = new GLfloat[16];
 
 	for (int i = 0; i < FIXED_MATRIX_SIZE; i++) {
@@ -33,7 +33,7 @@ void matrixTranslateMoviment(GLfloat dx, GLfloat dy, GLfloat dz) {
 
 	GLfloat currentMatrix[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, currentMatrix);
-	
+
 	const GLfloat identityMatrix[16] = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -58,7 +58,7 @@ void matrixTranslateScale(GLfloat dx, GLfloat dy, GLfloat dz) {
 		0, 0, dz, 0,
 		0, 0, 0, 1
 	};
-	
+
 	const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
 
 	glLoadMatrixf(resultMatrix);
@@ -91,14 +91,14 @@ void Desenha(void)
 
 	//desenhaMalha();
 
-	//matrixTranslateMoviment(dx, dy, dz);
+	matrixTranslateMoviment(dx, dy, dz);
 	glutWireTeapot(50.0f);     // constrói um objeto qualquer
 	glPopMatrix();  // desempacota as ações
 
-	matrixTranslateScale(dx, dy, dz);
+	//matrixTranslateScale(dx, dy, dz);
 	//glScalef(dx, dy, dz);
 	glLoadIdentity();
-	
+
 	// Executa os comandos OpenGL
 	glutSwapBuffers();  // troca de buffer para acelerar a cena
 
@@ -152,8 +152,8 @@ void mouseInteract(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON) {
 
 		if (state == GLUT_UP) {
-			
-			dx = -1*GLUT_WINDOW_WIDTH + x;
+
+			dx = x - GLUT_WINDOW_WIDTH;
 			dy = GLUT_WINDOW_HEIGHT - y;
 
 			std::cout << x << std::endl;
@@ -162,16 +162,17 @@ void mouseInteract(int button, int state, int x, int y) {
 		}
 	}
 
+	EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
 
 void teclado(unsigned char key, int x, int y) {
 
 	switch (tolower(key)) {
-		case 'd': dx += 10; break;
-		case 'a': dx -= 10; break;
-		case 's': dy -= 10; break;
-		case 'w': dy += 10; break;
+	case 'd': dx += 10; break;
+	case 'a': dx -= 10; break;
+	case 's': dy -= 10; break;
+	case 'w': dy += 10; break;
 	}
 
 	std::cout << "[Tecla: " << key << " = {" << dx << ", " << dy << "}]" << std::endl;
