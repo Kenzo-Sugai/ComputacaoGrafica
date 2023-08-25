@@ -11,6 +11,9 @@ GLfloat angle, fAspect;
 
 GLfloat dx = 0, dy = 0, dz = 0;
 
+#define LARGURA 400
+#define ALTURA 400
+
 GLfloat* matrixMultiply(const GLfloat* M1, const GLfloat* M2) {
 
 	const int FIXED_MATRIX_SIZE = 4;
@@ -91,7 +94,8 @@ void Desenha(void)
 
 	//desenhaMalha();
 
-	matrixTranslateMoviment(dx, dy, dz);
+	//matrixTranslateMoviment(dx, dy, dz);
+	glTranslatef(dx, dy, 0);
 	glutWireTeapot(50.0f);     // constrói um objeto qualquer
 	glPopMatrix();  // desempacota as ações
 
@@ -109,7 +113,7 @@ void Desenha(void)
 void Inicializa(void)
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	angle = 45;
+	angle = 100;
 }
 
 // Função usada para especificar o volume de visualização
@@ -129,7 +133,7 @@ void EspecificaParametrosVisualizacao(void)
 	glLoadIdentity();
 
 	// Especifica posição do observador e do alvo
-	gluLookAt(0, 80, 200, 0, 0, 0, 0, 1, 0);
+	gluLookAt(0, 0, 200, 0, 0, 0, 0, 1, 0);
 }
 
 // Função callback chamada quando o tamanho da janela é alterado 
@@ -153,12 +157,20 @@ void mouseInteract(int button, int state, int x, int y) {
 
 		if (state == GLUT_UP) {
 
-			dx = x - GLUT_WINDOW_WIDTH;
-			dy = GLUT_WINDOW_HEIGHT - y;
+			dx = x - (LARGURA/2);
+			dy = (ALTURA/2) - y;
 
 			std::cout << x << std::endl;
 			std::cout << y << std::endl;
 
+		}
+		if (state == GLUT_DOWN) {  // Zoom-in
+			//if (angle >= 10) angle -= 5;
+		}
+	}
+	if (button == GLUT_RIGHT_BUTTON) {
+		if (state == GLUT_DOWN) {  // Zoom-out
+			//if (angle <= 130) angle += 5;
 		}
 	}
 
@@ -202,7 +214,7 @@ int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(350, 300);
+	glutInitWindowSize(400, 400);
 	glutCreateWindow("Visualizacao 3D");
 	glutDisplayFunc(Desenha);
 	glutReshapeFunc(AlteraTamanhoJanela);
