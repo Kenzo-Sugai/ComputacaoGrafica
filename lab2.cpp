@@ -5,6 +5,7 @@
 // "OpenGL SuperBible", 2nd Edition, de Richard S. e Wright Jr.
 
 #include <gl/glut.h>
+#include <GL/freeglut.h>
 #include <iostream>
 
 GLfloat angle, fAspect;
@@ -157,20 +158,12 @@ void mouseInteract(int button, int state, int x, int y) {
 
 		if (state == GLUT_UP) {
 
-			dx = x - (LARGURA/2);
-			dy = (ALTURA/2) - y;
+			dx = x - (LARGURA / 2);
+			dy = (ALTURA / 2) - y;
 
 			std::cout << x << std::endl;
 			std::cout << y << std::endl;
 
-		}
-		if (state == GLUT_DOWN) {  // Zoom-in
-			//if (angle >= 10) angle -= 5;
-		}
-	}
-	if (button == GLUT_RIGHT_BUTTON) {
-		if (state == GLUT_DOWN) {  // Zoom-out
-			//if (angle <= 130) angle += 5;
 		}
 	}
 
@@ -209,6 +202,20 @@ void GerenciaMouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
+void mouseWheel(int button, int dir, int x, int y) {
+
+	if (dir > 0) {
+		if (angle >= 10) angle -= 5;
+	}
+	else {
+		if (angle <= 130) angle += 5;
+	}
+
+	EspecificaParametrosVisualizacao();
+	glutPostRedisplay();
+
+}
+
 // Programa Principal
 int main(int argc, char* argv[])
 {
@@ -219,6 +226,7 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(Desenha);
 	glutReshapeFunc(AlteraTamanhoJanela);
 	glutMouseFunc(mouseInteract);
+	glutMouseWheelFunc(mouseWheel);
 	//glutMouseFunc(GerenciaMouse);
 	glutKeyboardFunc(teclado);
 
