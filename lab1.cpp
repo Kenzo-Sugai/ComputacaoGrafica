@@ -1,4 +1,3 @@
-
 // TeaPot3D.c - Isabel H. Manssour
 // Um programa OpenGL que exemplifica a visualização 
 // de objetos 3D.
@@ -10,6 +9,8 @@
 #include <iostream>
 
 GLfloat angle, fAspect;
+
+GLfloat angleX = 0, angleY = 0;
 
 GLfloat dx = 0, dy = 0, dz = 0;
 
@@ -177,28 +178,7 @@ void mouseClickRotate(int button, int state, int x, int y) {
 	dx = x - (LARGURA / 2);
 	dy = (ALTURA / 2) - y;
 
-	if (dx > 0) { // ROTATE RIGHT
-
-		glRotatef(angle, dx, 0, 1);
-
-	}
-	if (dx <= 0) { // ROTATE LEFT
-
-		glRotatef(angle, dx, 0, 1);
-
-	}
-	if (dy > 0) { // ROTATE UP
-
-		glRotatef(angle, 0, dy, 1);
-
-	}
-	if (dy <= 0) { // ROTATE DOWN
-
-		glRotatef(angle, 0, dy, 1);
-
-	}
-
-	//EspecificaParametrosVisualizacao();
+	EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 
 
@@ -208,6 +188,7 @@ void mouseClickRotate(int button, int state, int x, int y) {
 
 void teclado(unsigned char key, int x, int y) {
 
+	/*
 	switch (tolower(key)) {
 	case 'd': dx += 10; break;
 	case 'a': dx -= 10; break;
@@ -216,14 +197,25 @@ void teclado(unsigned char key, int x, int y) {
 	case 'q': dz -= 10; break;
 	case 'e': dz += 10; break;
 	}
+	*/
 
-
-	glRotatef(angle, dx, dy, dz);
+	switch (tolower(key)) {
+		case 'd': angleX += 10; break;
+		case 'a': angleX -= 10; break;
+		case 's': angleY -= 10; break;
+		case 'w': angleY += 10; break;
+	}
+	
+	glPushMatrix();
+	glRotatef(angleY, 1.0f, 0.0f, 0.0f);
+	glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+	glPopMatrix();
+	glutSwapBuffers();
 
 	std::cout << "Angle: " << angle << " [Tecla: " << key << " = {" << dx << ", " << dy << "}]" << std::endl;
 
-	EspecificaParametrosVisualizacao();
-	glutPostRedisplay();
+	//EspecificaParametrosVisualizacao();
+	//glutPostRedisplay();
 
 
 }
