@@ -7,6 +7,7 @@
 #include <gl/glut.h>
 #include <GL/freeglut.h>
 #include <iostream>
+#include <cmath>
 
 GLfloat angle, fAspect;
 
@@ -71,6 +72,56 @@ void matrixTranslateScale(GLfloat dx, GLfloat dy, GLfloat dz) {
 
 }
 
+void matrixTranslateRotate(GLfloat angle, GLfloat dx, GLfloat dy, GLfloat dz) {
+
+	GLfloat currentMatrix[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentMatrix);
+
+	if (dx == 1.0f) {
+
+		const GLfloat identityMatrix[16] = {
+			1, 0, 0, 0,
+			0, cos(angle), -sin(angle), 0,
+			0, sin(angle), cos(angle), 0,
+			0, 0, 0, 1
+		};
+
+		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
+
+		glLoadMatrixf(resultMatrix);
+	
+	}
+	else if (dy == 1.0f) {
+
+		const GLfloat identityMatrix[16] = {
+			cos(angle), 0, -sin(angle), 0,
+			0, 1, 0, 0,
+			sin(angle), 0, cos(angle), 0,
+			0, 0, 0, 1
+		};
+
+		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
+
+		glLoadMatrixf(resultMatrix);
+
+	}
+	else if (dz == 1.0f) {
+
+		const GLfloat identityMatrix[16] = {
+			cos(angle), -sin(angle), 0, 0, 
+			sin(angle), cos(angle), 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+		};
+
+		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
+
+		glLoadMatrixf(resultMatrix);
+
+	}
+
+}
+
 
 void desenhaMalha() {
 
@@ -81,6 +132,12 @@ void desenhaMalha() {
 	glVertex3f(0, 50, 0);
 	glVertex3f(50, 50, 0);
 	glEnd();
+}
+
+void rotate() {
+
+	
+	glRotatef(angle, 0.0f, 1.0f, 0.0f);
 }
 
 // Função callback chamada para fazer o desenho
@@ -95,11 +152,9 @@ void Desenha(void)
 	// Desenha o teapot com a cor corrente (wire-frame)
 	glPushMatrix(); // empacota as ações
 
-	//desenhaMalha();
-
-	//matrixTranslateMoviment(dx, dy, dz);
-	glTranslatef(dx, dy, 0);
+	rotate();
 	glutWireTeapot(50.0f);     // constrói um objeto qualquer
+	
 	glPopMatrix();  // desempacota as ações
 
 	//matrixTranslateScale(dx, dy, dz);
@@ -168,7 +223,7 @@ void mouseInteract(int button, int state, int x, int y) {
 
 		}
 	}
-	
+
 	EspecificaParametrosVisualizacao();
 	glutPostRedisplay();
 }
@@ -188,29 +243,28 @@ void mouseClickRotate(int button, int state, int x, int y) {
 
 void teclado(unsigned char key, int x, int y) {
 
+	
+	switch (tolower(key)) {
+		case 'd': angle += 10; break;
+		case 'a': angle -= 10; break;
+		case 's': dy -= 10; break;
+		case 'w': dy += 10; break;
+		case 'q': dz -= 10; break;
+		case 'e': dz += 10; break;
+	}
+	
 	/*
 	switch (tolower(key)) {
-	case 'd': dx += 10; break;
-	case 'a': dx -= 10; break;
-	case 's': dy -= 10; break;
-	case 'w': dy += 10; break;
-	case 'q': dz -= 10; break;
-	case 'e': dz += 10; break;
+	case 'd': angleX += 10; break;
+	case 'a': angleX -= 10; break;
+	case 's': angleY -= 10; break;
+	case 'w': angleY += 10; break;
 	}
 	*/
 
-	switch (tolower(key)) {
-		case 'd': angleX += 10; break;
-		case 'a': angleX -= 10; break;
-		case 's': angleY -= 10; break;
-		case 'w': angleY += 10; break;
-	}
-	
-	glPushMatrix();
-	glRotatef(angleY, 1.0f, 0.0f, 0.0f);
-	glRotatef(angleX, 1.0f, 0.0f, 0.0f);
-	glPopMatrix();
-	glutSwapBuffers();
+	EspecificaParametrosVisualizacao();
+	glutPostRedisplay();
+
 
 	std::cout << "Angle: " << angle << " [Tecla: " << key << " = {" << dx << ", " << dy << "}]" << std::endl;
 
@@ -258,7 +312,7 @@ int main(int argc, char* argv[])
 	glutCreateWindow("Visualizacao 3D");
 	glutDisplayFunc(Desenha);
 	glutReshapeFunc(AlteraTamanhoJanela);
-	//glutMouseFunc(mouseInteract);
+	glutMouseFunc(mouseInteract);
 	//glutMouseFunc(mouseClickRotate);
 	glutMouseWheelFunc(mouseWheel);
 	//glutMouseFunc(GerenciaMouse);
