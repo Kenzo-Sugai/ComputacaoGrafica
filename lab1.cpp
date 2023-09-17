@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cmath>
 
-GLfloat angle, fAspect;
+GLfloat angle, fAspect, rot = 0;
 
 GLfloat angleX = 0, angleY = 0;
 
@@ -17,6 +17,12 @@ GLfloat dx = 0, dy = 0, dz = 0;
 
 #define LARGURA 400
 #define ALTURA 400
+#define M_PI 3.14159265359
+
+
+inline double to_degrees(double radians) {
+	return radians * (180.0 / M_PI);
+}
 
 GLfloat* matrixMultiply(const GLfloat* M1, const GLfloat* M2) {
 
@@ -72,56 +78,50 @@ void matrixTranslateScale(GLfloat dx, GLfloat dy, GLfloat dz) {
 
 }
 
-void matrixTranslateRotate(GLfloat angle, GLfloat dx, GLfloat dy, GLfloat dz) {
+void matrixTranslateRotate(GLfloat angleRot, GLfloat dx, GLfloat dy, GLfloat dz) {
 
 	GLfloat currentMatrix[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, currentMatrix);
+
+	angleRot *= (M_PI / 180.0);
 
 	if (dx == 1.0f) {
 
 		const GLfloat identityMatrix[16] = {
 			1, 0, 0, 0,
-			0, cos(angle), -sin(angle), 0,
-			0, sin(angle), cos(angle), 0,
+			0, cos(angleRot), -sin(angleRot), 0,
+			0, sin(angleRot), cos(angleRot), 0,
 			0, 0, 0, 1
 		};
 
-		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
-
-		glLoadMatrixf(resultMatrix);
+		glMultMatrixf(identityMatrix);
 	
 	}
 	else if (dy == 1.0f) {
 
 		const GLfloat identityMatrix[16] = {
-			cos(angle), 0, -sin(angle), 0,
+			cos(angleRot), 0, sin(angleRot), 0,
 			0, 1, 0, 0,
-			sin(angle), 0, cos(angle), 0,
+			-sin(angleRot), 0, cos(angleRot), 0,
 			0, 0, 0, 1
 		};
 
-		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
-
-		glLoadMatrixf(resultMatrix);
+		glMultMatrixf(identityMatrix);
 
 	}
 	else if (dz == 1.0f) {
 
 		const GLfloat identityMatrix[16] = {
-			cos(angle), -sin(angle), 0, 0, 
-			sin(angle), cos(angle), 0, 0,
+			cos(angleRot), -sin(angleRot), 0, 0,
+			sin(angleRot), cos(angleRot), 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		};
 
-		const GLfloat* resultMatrix = matrixMultiply(currentMatrix, identityMatrix);
-
-		glLoadMatrixf(resultMatrix);
-
+		glMultMatrixf(identityMatrix);
 	}
 
 }
-
 
 void desenhaMalha() {
 
@@ -134,10 +134,13 @@ void desenhaMalha() {
 	glEnd();
 }
 
-void rotate() {
+void translate() {
 
 	
-	glRotatef(angle, 0.0f, 1.0f, 0.0f);
+	glRotatef(rot, 0.0f, 1.0f, 0.0f);
+
+	rot += 10;
+	
 }
 
 // Função callback chamada para fazer o desenho
@@ -147,14 +150,12 @@ void Desenha(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// define a cor dos objetos que vão ser construídos
-	glColor3f(0.0f, 0.0f, 1.0f);
 
 	// Desenha o teapot com a cor corrente (wire-frame)
 	glPushMatrix(); // empacota as ações
-
-	rotate();
-	glutWireTeapot(50.0f);     // constrói um objeto qualquer
-	
+	glColor3f(0.0f, 0.0f, 1.0f);
+	translate();
+	glutWireTeapot(50.0); // constrói um objeto qualquer
 	glPopMatrix();  // desempacota as ações
 
 	//matrixTranslateScale(dx, dy, dz);
@@ -245,8 +246,8 @@ void teclado(unsigned char key, int x, int y) {
 
 	
 	switch (tolower(key)) {
-		case 'd': angle += 10; break;
-		case 'a': angle -= 10; break;
+		case 'd': rot += 1; break;
+		case 'a': rot -= 1; break;
 		case 's': dy -= 10; break;
 		case 'w': dy += 10; break;
 		case 'q': dz -= 10; break;
@@ -312,11 +313,11 @@ int main(int argc, char* argv[])
 	glutCreateWindow("Visualizacao 3D");
 	glutDisplayFunc(Desenha);
 	glutReshapeFunc(AlteraTamanhoJanela);
-	glutMouseFunc(mouseInteract);
+	//glutMouseFunc(mouseInteract);
 	//glutMouseFunc(mouseClickRotate);
-	glutMouseWheelFunc(mouseWheel);
+	//glutMouseWheelFunc(mouseWheel);
 	//glutMouseFunc(GerenciaMouse);
-	glutKeyboardFunc(teclado);
+	//glutKeyboardFunc(teclado);
 
 	Inicializa();
 	glutMainLoop();
